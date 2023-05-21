@@ -1,4 +1,6 @@
+import java.lang.Exception
 import java.util.Scanner
+import kotlin.system.exitProcess
 
 abstract class Doc (val name:String)
 class Note(private val noteName:String, val noteDesc:String):Doc(noteName)
@@ -6,73 +8,82 @@ class Archive(private val arcName:String):Doc(arcName)
 {
     val notesList= mutableListOf<Note>()
 }
-class Menu<T:Doc>
+class Menu<T:Doc>()
 {
-    var listOfDocs:MutableList<T>? = null
-    fun putList(list: MutableList<T>)
+    fun showMenu(listOfFuncs :MutableMap<String, (Menu<T>?) -> Unit>,listOfDocs: MutableList<T>)
     {
-        listOfDocs = list
-    }
-    fun createObj(c:Char)
-    {
-
-    }
-    fun getMenu(c:Char )
-    {
-
-            when (c)
-            {
-                'a'-> {
-                    println("Список архивов:")
-                    println("0. Создать архив")
-
-                }
-                'n'->
-                {
-                    println("Список заметок:")
-                    println("0. Создать заметку")
-                }
-
-        }
-        var i = 1
-        if (listOfDocs!=null)
+        var i = 0
+        for (f in listOfFuncs)
         {
-            for (d in listOfDocs!!)
+            if(f.key!="Список архивов")
             {
-                println("$i. ${d.name}")
-                i++
+                println("$i. ${f.key}")
+                i+=listOfDocs.size
             }
+            else
+                f.value(this)
         }
-        println("$i. Выход")
-        while(true)
+    }
+    /*fun userInput(input:String):Int
+    {
+        try
         {
-            print("> ")
-            val input  = Scanner(System.`in`).nextLine().toString()
-            try
+            val inputInt = input.toInt()
+            if(inputInt in 0..list.size+1)
+            return inputInt
+            else
             {
-                val inputInt = input.toInt()
-                val lastInd = listOfDocs?.size?.toInt()
-                when(i)
-                {
-
-                }
+                println("Цифра не входит в диапазон")
+                return -2
             }
-            catch (ex:Exception)
-            {
-                println("Данные введены некорректно")
-            }
-
         }
-
-
+        catch (ex:Exception)
+        {
+            println("Введите цифру")
+            return -2
+        }
+    }*/
+    fun showStuff (listOfStuff:MutableList<out Doc>)
+    {
+        for (a in listOfStuff)
+            println("${listOfStuff.indexOf(a)+1}. ${a.name}")
 
     }
+    fun createNew(listOfStuff:MutableList<out Doc>):MutableList<in Doc>
+    {
+        var result:MutableList<in Doc> = mutableListOf()
+        print("Введите название архива -> ")
+        val arch =Archive(Scanner(System.`in`).nextLine())
+        for (a in listOfStuff)
+            result.add(a)
+        result.add(arch)
+        return result
+    }
+
 }
 inline fun<reified T> checkType(list: MutableList<T>, type:T):Boolean
 {
     return (list is T)
 }
 fun main(args: Array<String>) {
-    println("Hello World!")
+
+    val archM:Menu<Archive> = Menu()
+    val listOfArchives = mutableListOf<Archive>()
+    val mapOfFuncs = mutableMapOf<String, (Menu<Archive>?)->Unit>(
+        "Создать архив" to {
+           menu-> menu?.createNew(listOfArchives)
+        },
+        "Список архивов" to {
+                menu -> menu?.showStuff(listOfArchives)
+        },
+        "Выход" to {}
+    )
+    var noteM:Menu<Note> = Menu()
+    var f = 0
+    while (f!=-1)
+    {
+        archM.showMenu(mapOfFuncs,listOfArchives)
+    }
+
 
 }
