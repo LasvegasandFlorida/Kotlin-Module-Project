@@ -1,0 +1,1 @@
+abstract class Doc (val name:String,var list:MutableList<Note>, var desc:String? )
