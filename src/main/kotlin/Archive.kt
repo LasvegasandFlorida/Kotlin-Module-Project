@@ -1,0 +1,1 @@
+class Archive(private val arcName:String, private val notesList:MutableList<Note> ):Doc(arcName,notesList, "")
